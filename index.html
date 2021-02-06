@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8">
+    <title>Test ZOE audio video functions</title>
+    <style>
+        .header__music {
+            margin-left: 90px;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: start;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+        }
+        .header__music--inner {
+            margin-top: -2px;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: start;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+        }
+        .header__music--controls {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: start;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+            margin: 0 20px;
+            margin-left: 0;
+        }
+        .header__music--play {
+            margin: 0 10px;
+            width: 12px;
+            text-align: center;
+            display: inline-block;
+        }
+        .header__music p {
+            font-size: 15px!important;
+            font-weight: 400!important;
+            line-height: normal!important;
+            margin: 0;
+        }
+        .header__music p {
+            color: #000;
+        }
+        
+        .header__music--name {
+            height: 15px;
+            width: 110px;
+            overflow: hidden;
+        }
+        .video {
+            position: relative;
+            width: 448px;
+        }
+        .video__soundOn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 2;
+        }
+        .video__soundOff {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 2;
+            display: none;
+        }
+    </style>
+  </head>
+  <body>
+    <audio id="audio" preload></audio>
+    <header>
+        <div class="header__music">
+				<div class="header__music--inner">
+					<div class="header__music--controls">
+						<a href="#" class="prev"><img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/prev.svg" alt=""></a>
+						<div class="header__music--play">
+							<a href="#" class="pause"><img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/pause.svg" alt=""></a>
+							<a href="#" class="play"><img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/play.svg" alt=""></a>
+						</div>
+						<a href="#" class="next"><img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/next.svg" alt=""></a>
+					</div>
+				</div>
+				<div class="header__music--name">
+					<p class="actual">Bla bla bla</p>
+				</div>
+			</div>
+    </header>
+    <main>
+        <div class="video">
+            <a href="#" class="video__soundOn">
+                <img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/nosoundwhite.svg" alt="">
+            </a>
+            <a href="#" class="video__soundOff">
+                <img src="https://projects.zonemediadev.sk/zoe/wp-content/themes/theme/fe/assets/img/content/soundwhite.svg" alt="">
+            </a>
+            <video playsinline autoplay muted loop id="video">
+                <source src="https://projects.zonemediadev.sk/zoe/wp-content/uploads/2020/12/video-hlavna-stranka.mp4" type="video/mp4">
+            </video>
+        </div>
+    </main>
+    <footer></footer>
+    <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js" id='jquery-js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery.marquee@1.5.0/jquery.marquee.min.js" type="text/javascript"></script>
+    
+    <script>
+		(function ($) {
+ 
+
+            function moveText() {
+                $('.header__music--name').marquee({
+                    duration: 5000,
+                    gap: 120,
+                    delayBeforeStart: 0,
+                    direction: 'left',
+                    duplicated: true,
+                    pauseOnHover: true
+                });
+            }            
+            
+            function music(items) {
+            var songs = items,
+                i = 0,
+                playing = false,
+                audio = document.getElementById("audio"),
+                video = document.getElementById("video"),
+                setMusic = function(index){
+                    var $mq = $('.header__music--name'),
+                        $actual = $('.header__music--name .actual'),
+                        src = songs[index].url,
+                        title = songs[index].title || "";
+                    // audio.pause(); // need this? https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/load#usage_notes
+                    audio.src = src;
+                    audio.load();
+                    $actual.text(title);
+                    $mq.marquee('destroy');
+                    if (title.length > 10 ) {
+                        moveText();
+                    }
+                    if (playing) {
+                        auPlay();
+                    }
+                },
+                auPlay = function(){
+                    video.volume=0;
+                    audio.volume=1;
+                    playing = true;
+                    audio.play();
+                },
+                auPause = function(){
+                    if (!video.muted) {
+                        video.volume = 1;
+                    }
+                    playing = false;
+                    audio.pause();
+                },
+                nextSong = function(){
+                    i = (i+1) % songs.length;
+                    setMusic(i);
+                },
+                prevSong = function(){
+                    i = (i || songs.length)-1;
+                    setMusic(i);
+                };
+                setMusic(0);
+                $('.pause').hide();
+                $('.play').click(function(e) { 
+                    e.preventDefault();
+                    auPlay();
+                    $(this).parent().find('.play').hide();
+                    $(this).parent().find('.pause').css('display','inline-block');
+                });
+                $('.pause').click(function(e) { 
+                    e.preventDefault();
+                    auPause();
+                    $(this).parent().find('.pause').hide();
+                    $(this).parent().find('.play').css('display','inline-block');
+                });
+                $('header .next').click(function(e) {
+                    e.preventDefault();
+                    nextSong();
+                });
+                $('header .prev').click(function(e) {
+                    e.preventDefault();
+                    prevSong();
+                });
+                audio.addEventListener("ended",function() {
+                    nextSong();
+                });
+            }
+
+            function video() {
+                var video = document.getElementById("video"),
+                    audio = document.getElementById("audio");
+                $('.video__soundOn').click(function(e) {
+                    e.preventDefault();
+                    video.muted=false;
+                    video.volume=1;
+                    audio.volume=0;
+                    $(this).hide();
+                    $('.video__soundOff').show();
+                });
+                $('.video__soundOff').click(function(e) {
+                    e.preventDefault();
+                    video.muted=true;
+                    video.volume=0;
+                    audio.volume=1;
+                    $(this).hide();
+                    $('.video__soundOn').show();
+                });
+            }
+
+
+            $(document).ready(function () {
+				video();
+                var hudba = [
+                                {
+                                    url:'https://projects.zonemediadev.sk/zoe/wp-content/uploads/2021/01/Peteris-Vasks-Distant-light-koncert-pre-husle-a-slacikovy-orchester-Rozalia-Miklasova-Tomaskova-husle.mp3',
+                                    title: 'Distant Light, koncert pre husle a sláčiky'
+                                },
+                                {
+                                    url: 'https://projects.zonemediadev.sk/zoe/wp-content/uploads/2021/01/Franz-Schuber-Smrt-a-dievca-I.mp3',
+                                    title: 'Schubert: Smrť a dievča, prvá časť'
+                                },
+                                {
+                                    url: 'https://projects.zonemediadev.sk/zoe/wp-content/uploads/2021/01/Jevgenij-Irsaj-Slovensko-laska-moja-koncert-pre-husle-violoncelo-a-slacikovy-orchester-Samuel-Miklas-husle-Kristina-Chalmovska-violoncelo.mp3',
+                                    title: 'Iršaj'
+                                },
+                                {
+                                    url: 'https://projects.zonemediadev.sk/zoe/wp-content/uploads/2021/01/Enio-Morricone-Gabriels-Oboe-Karolina-Hurayova-Zivalikova-violoncelo-Vlastimil-Dufka-hoboj.mp3',
+                                    title: null
+                                }
+                            ];
+				music(hudba);
+			});
+		})(jQuery);
+	</script>
+  </body>
+</html>
